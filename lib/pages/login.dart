@@ -98,6 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       showToast("Successfully Logged In");
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.setBool('isLoggedIn', true);
+                      await prefs.setInt('userId', result['data']['id']);
+                      print(result['data']['id']);
                       Navigator.pushReplacementNamed(context, '/main');
                     } else {
                       showToast(result['message']);

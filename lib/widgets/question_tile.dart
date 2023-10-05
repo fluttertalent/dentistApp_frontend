@@ -1,97 +1,105 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../utils/global.dart';
 
 class QuestionTile extends StatefulWidget {
+  final Map<String, dynamic> question;
+  final int index;
+  final Function(Map<String, dynamic> question, String option) onOptionSelected;
 
-  final String title;
-
-  const QuestionTile({required this.title});
+  QuestionTile({required this.question, required this.index, required this.onOptionSelected});
 
   @override
-  State<QuestionTile> createState() => _QuestionTileState();
+  _QuestionTileState createState() => _QuestionTileState();
 }
 
 class _QuestionTileState extends State<QuestionTile> {
-
-  String? _answer = 'no';
-  late TargetPlatform? platform;
+  late bool yesNo;
+  late String selectedOption;
 
   @override
   void initState() {
     super.initState();
+    yesNo = widget.question['yes_no'];
+    selectedOption = yesNo ? '0' : widget.question['options'].keys.first.toString();
+  }
+
+  void _handleOptionSelected(String value) {
+
+    setState(() {
+      selectedOption = value;
+    });
+    widget.onOptionSelected(widget.question, value);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      margin: const EdgeInsets.symmetric(vertical: 9),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: const Color(0xFFDEDEDE))),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 5),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-          children : [
-            Container(
-                width: MediaQuery.of(context).size.width*0.8,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF33343C)),
-                )
-            ),
-            Container(
-              child:
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Radio(
-                          value: 'yes',
-                          groupValue: _answer,
-                          onChanged: (value) {
-                            setState(() {
-                              _answer = value;
-                            });
-                            Provider.of<GlobalData>(context, listen: false).plusScore();
-                          },
-                        ),
-                        const Text('Yes'),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Radio(
-                          value: 'no',
-                          groupValue: _answer,
-                          onChanged: (value) {
-                            setState(() {
-                              _answer = value;
-                            });
-                              // Provider.of<GlobalData>(context, listen: false).minusScore();
-                              Provider.of<GlobalData>(context, listen: false).minusScore();
-                            },
-
-                        ),
-                        const Text('No'),
-                      ],
-                    ),
-                  ],
-                ),
-            )
-          ]
+    return Card(
+      child: ListTile(
+        title: Row(
+          children: [
+            Text((widget.index + 1).toString() + ". "),
+            Flexible(child: Text(widget.question['text'])),
+          ],
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            children: [
+              const SizedBox(width: 45.0),
+              Expanded(child: yesNo ? _buildYesNoOptions() : _buildOtherOptions()),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildYesNoOptions() {
+    return Row(
+      children: [
+        _buildOption(widget.question['weight'].toString(),'Yes'),
+        _buildOption('0', 'No'),
+      ],
+    );
+  }
 
+  // Widget _buildOtherOptions() {
+  //   var options = (widget.question['options'] as Map<String, dynamic>).values.toList();
+  //   var vals = (widget.question['options'] as Map<String, dynamic>).keys.toList();
+  //   var option_pairs = (widget.question['options'] as Map<String, dynamic>);
+  //   print(option_pairs);
+  //
+  //   return
+  //     Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: options.map((option) => _buildOption(option.toString())).toList(),
+  //     );
+  // }
+
+  Widget _buildOtherOptions() {
+    var option_pairs = (widget.question['options'] as Map<String, dynamic>);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: option_pairs.entries.map((entry) {
+        var key = entry.key;
+        var option = entry.value;
+        return _buildOption(key, option);
+      }).toList(),
+    );
+  }
+
+  Widget _buildOption(String key, String option) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio<String>(
+          value: key,
+          groupValue: selectedOption,
+          onChanged: (value) {
+            _handleOptionSelected(value!);
+            },
+        ),
+        Text(option),
+      ],
+    );
+  }
 }

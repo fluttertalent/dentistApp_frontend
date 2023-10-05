@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:dentalcavity/utils/global.dart';
 import 'package:dentalcavity/pages/login.dart';
 import 'package:dentalcavity/pages/signup.dart';
+import 'package:dentalcavity/pages/question.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -50,7 +51,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => LoginScreen(),
         '/signup': (context) => SignupScreen(),
-        '/main': (context) => const MainPage(title: 'Dental Cavity Questions',),
+        '/main': (context) => QuestionListScreen(),
       },
       // home:  MainPage(title: 'Dental Cavity Questions'),
     );
